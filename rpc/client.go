@@ -642,3 +642,8 @@ func (c *Client) read(codec ServerCodec) {
 		c.readOp <- readOp{msgs, batch}
 	}
 }
+
+// WaitForClose waits until the client's main loop ends.
+func (c *Client) WaitForClose() {
+	<-c.didClose
+}
