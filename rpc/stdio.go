@@ -64,3 +64,8 @@ func (io stdioConn) RemoteAddr() string {
 func (io stdioConn) SetWriteDeadline(t time.Time) error {
 	return &net.OpError{Op: "set", Net: "stdio", Source: nil, Addr: nil, Err: errors.New("deadline not supported")}
 }
+
+// DialCodec creates a client which uses function to create the codec
+func DialCodec(ctx context.Context, connect reconnectFunc) (*Client, error) {
+	return newClient(ctx, connect)
+}
