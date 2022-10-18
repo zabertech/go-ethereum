@@ -77,7 +77,7 @@ func runTestScript(t *testing.T, file string) {
 
 	clientConn, serverConn := net.Pipe()
 	defer clientConn.Close()
-	go server.ServeCodec(NewCodec(serverConn), 0)
+	go server.ServeCodec(NewCodec(serverConn), nil)
 	readbuf := bufio.NewReader(clientConn)
 	for _, line := range strings.Split(string(content), "\n") {
 		line = strings.TrimSpace(line)
@@ -122,7 +122,7 @@ func TestServerShortLivedConn(t *testing.T) {
 		t.Fatal("can't listen:", err)
 	}
 	defer listener.Close()
-	go server.ServeListener(listener)
+	go server.ServeListener(listener, nil)
 
 	var (
 		request  = `{"jsonrpc":"2.0","id":1,"method":"rpc_modules"}` + "\n"

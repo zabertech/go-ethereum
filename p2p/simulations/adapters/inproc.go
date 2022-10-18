@@ -207,7 +207,7 @@ func (sn *SimNode) ServeRPC(conn *websocket.Conn) error {
 		return err
 	}
 	codec := rpc.NewFuncCodec(conn, conn.WriteJSON, conn.ReadJSON)
-	handler.ServeCodec(codec, 0)
+	handler.ServeCodec(codec, nil)
 	return nil
 }
 

@@ -98,6 +98,9 @@ type Client struct {
 	reqInit     chan *requestOp  // register response IDs, takes write lock
 	reqSent     chan error       // signals write completion, releases write lock
 	reqTimeout  chan *requestOp  // removes response IDs when call timeout expires
+
+	// Use this field to store data associated with the client.
+	Data interface{}
 }
 
 type reconnectFunc func(ctx context.Context) (ServerCodec, error)
@@ -197,12 +200,12 @@ func newClient(initctx context.Context, connect reconnectFunc) (*Client, error) 
 	if err != nil {
 		return nil, err
 	}
-	c := initClient(conn, randomIDGenerator(), new(serviceRegistry))
+	c := initClient(conn, randomIDGenerator(), new(serviceRegistry), nil)
 	c.reconnectFunc = connect
 	return c, nil
 }
 
-func initClient(conn ServerCodec, idgen func() ID, services *serviceRegistry) *Client {
+func initClient(conn ServerCodec, idgen func() ID, services *serviceRegistry, beforeDispatch func(*Client)) *Client {
 	_, isHTTP := conn.(*httpConn)
 	c := &Client{
 		idgen:       idgen,
@@ -218,6 +221,9 @@ func initClient(conn ServerCodec, idgen func() ID, services *serviceRegistry) *C
 		reqInit:     make(chan *requestOp),
 		reqSent:     make(chan error, 1),
 		reqTimeout:  make(chan *requestOp),
+	}
+	if beforeDispatch != nil {
+		beforeDispatch(c)
 	}
 	if !isHTTP {
 		go c.dispatch(conn)
