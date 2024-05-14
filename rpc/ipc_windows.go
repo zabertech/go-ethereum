@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with the go-ethereum library. If not, see <http://www.gnu.org/licenses/>.
 
+//go:build windows
 // +build windows
 
 package rpc
@@ -23,7 +24,7 @@ import (
 	"net"
 	"time"
 
-	"gopkg.in/natefinch/npipe.v2"
+	io "github.com/Microsoft/go-winio"
 )
 
 // This is used if the dialing context has no deadline. It is much smaller than the
@@ -32,7 +33,7 @@ const defaultPipeDialTimeout = 2 * time.Second
 
 // ipcListen will create a named pipe on the given endpoint.
 func ipcListen(endpoint string) (net.Listener, error) {
-	return npipe.Listen(endpoint)
+	return io.ListenPipe(endpoint, nil)
 }
 
 // newIPCConnection will connect to a named pipe with the given endpoint as name.
@@ -44,5 +45,5 @@ func newIPCConnection(ctx context.Context, endpoint string) (net.Conn, error) {
 			timeout = 0
 		}
 	}
-	return npipe.DialTimeout(endpoint, timeout)
+	return io.DialPipe(endpoint, &timeout)
 }
